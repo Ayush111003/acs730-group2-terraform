@@ -1,113 +1,142 @@
-🚀Two-Tier Web Application Automation with Terraform
+🚀 Project: Two-Tier Web Application Automation with Terraform
 
-📌 Overview
+This project deploys a scalable and highly available two-tier web application on AWS using Terraform across three environments: Dev, Staging, and Prod.
 
-This project implements a scalable, secure, and highly available two-tier web application on AWS using Terraform. The infrastructure is deployed across three environments:
+🖥️ Cloud9 Environment Setup
 
-Development (Dev)
-Staging
-Production (Prod)
+This project is developed and deployed using AWS Cloud9, which provides a pre-configured environment with AWS credentials (LabRole).
 
-The solution follows Infrastructure as Code (IaC) principles with a modular and reusable design.
+✔ Key Notes:
+No need to configure AWS credentials manually
+IAM permissions are managed via LabRole
+Terraform is installed manually in Cloud9
+⚙️ Step 1 — Install Terraform
 
-🧱 Architecture
-VPC per environment (multi-AZ)
-Public subnets:
-Application Load Balancer (ALB)
-Bastion Host
-NAT Gateway
-Private subnets:
-EC2 instances (web servers)
-Auto Scaling Group (ASG)
-Amazon S3 (images + Terraform state)
-IAM Role (LabRole)
-⚙️ Key Features
-Multi-environment deployment (Dev, Staging, Prod)
-Modular Terraform structure
-Auto Scaling based on CPU utilization
-High availability across 3 Availability Zones
-Secure architecture (private subnets + IAM roles)
-Web page displays instance details (Instance ID, AZ)
-Remote Terraform state using S3
-📂 Project Structure
-modules/
-dev/
-staging/
-prod/
+Run the following commands in Cloud9 terminal:
 
-Each environment contains:
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+sudo yum install terraform -y
 
-network/ → VPC and networking
+Verify installation:
+
+terraform -version
+📂 Step 2 — Project Structure
+acs730-group2-terraform/
+│
+├── modules/
+│   └── network/
+│  
+│
+├── dev/
+│   ├── network/
+│   └── webservers/
+│
+├── staging/
+│   ├── network/
+│   └── webservers/
+│
+├── prod/
+│   ├── network/
+│   └── webservers/
+
+
+📌 Explanation:
+modules/ → reusable Terraform code
+
+dev/staging/prod/ → environment-specific deployments
+
+Each environment has:
+network/ → VPC, subnets, routing
 webservers/ → EC2, ALB, ASG
-🪣 Prerequisites
-
-Before deployment:
+🪣 Step 3 — S3 Buckets (Manual Setup)
 
 Create 3 S3 buckets:
+
 group2-dev-bucket-terraform
 group2-staging-bucket-terraform
 group2-prod-bucket-terraform
-Inside each bucket:
-Create images/ folder
-Upload at least one image
-Ensure Terraform is installed
-🚀 Deployment
-🔹 Dev Environment
+
+Inside each bucket create:
+
+images/
+(Terraform will create state file automatically)
+
+Upload at least one image into:
+
+images/
+🔐 Step 4 — IAM (AWS Academy Note)
+
+Due to AWS Academy restrictions:
+
+❌ Cannot create IAM users/groups
+✅ Use LabRole
+
+Terraform uses:
+
+iam_instance_profile = var.instance_profile_name
+
+👉 This allows EC2 to access S3 securely.
+
+🌐 Step 5 — Deploy Dev Environment
+🔹 Network
 cd dev/network
 terraform init
+terraform validate
+terraform plan
 terraform apply
-
+🔹 Webservers
 cd ../webservers
 terraform init
+terraform validate
+terraform plan
 terraform apply
-🔹 Staging & Prod
+🌐 Step 6 — Deploy Staging & Prod
 
-Repeat the same steps in:
+Repeat same steps:
 
-staging/
-prod/
-🌐 Access Application
+cd staging/network
+cd staging/webservers
+
+cd prod/network
+cd prod/webservers
+🌍 Step 7 — Access the Application
 
 After deployment:
 
 terraform output alb_dns
 
-Open the URL in browser:
+Open in browser:
 
-✔ Website loads
-✔ Image from S3
-✔ Instance ID changes (proves load balancing)
+✔ You should see:
 
-🔁 Cleanup
+Web page served by EC2
+Image loaded from S3
+Instance ID (changes → proves load balancing)
+🔁 Step 8 — Update Web Page
 
-To remove infrastructure:
+If you update install_httpd.tpl:
 
+⚠️ Important:
+
+user_data runs only at instance creation
+
+👉 Solution:
+
+terraform apply
+
+OR manually:
+
+Terminate instance → ASG recreates it
+🔑 Step 9 — SSH Access
+Bastion Access:
+ssh -i vockey.pem ec2-user@<bastion-public-ip>
+From Bastion to Private EC2:
+ssh ec2-user@<private-ip>
+🧹 Step 10 — Destroy Infrastructure
 terraform destroy
-🔐 Security
-Private subnets for EC2 instances
-Bastion host for SSH access
-IAM Role (LabRole) for S3 access
-No public S3 access
-🔄 CI/CD (GitHub Actions)
-TFLint → Terraform linting
-Trivy → security scanning
 
-Triggered on:
+⚠️ Run in both:
 
-Push to staging branch
-Pull requests to prod branch
-👥 Team Members
-Name	GitHub
-Marjan Haghighi	(your username)
-Ayush Patel	
-Faizan Razzakbhai	
-Nrupad Ravai	
-Sharun Manakkara	
-⚠️ Notes
-Do NOT upload .pem files
-Do NOT upload .terraform/ directory
-Ensure correct S3 bucket configuration
-Use correct EC2 key pair name
-⭐ Conclusion
-
-This project demonstrates a complete automated deployment of a cloud-based application using Terraform, following best practices in scalability, security, and DevOps workflows.
+network/
+webservers/
