@@ -18,29 +18,6 @@ sudo yum install -y yum-utils
 sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
 sudo yum install terraform -y
 
-Verify installation:
-
-terraform -version
-📂 Step 2 — Project Structure
-acs730-group2-terraform/
-│
-├── modules/
-│   └── network/
-│  
-│
-├── dev/
-│   ├── network/
-│   └── webservers/
-│
-├── staging/
-│   ├── network/
-│   └── webservers/
-│
-├── prod/
-│   ├── network/
-│   └── webservers/
-
-
 📌 Explanation:
 modules/ → reusable Terraform code
 
