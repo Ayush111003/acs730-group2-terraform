@@ -1,247 +1,249 @@
-# ACS730 - Final Project
-## Two-Tier Web Application Automation with Terraform ##
+================================================================================
+  ACS730 - FINAL PROJECT
+  Two-Tier Web Application Automation with Terraform
+  Group 2 | Winter 2026 | Professor: Leo Lu | Seneca College
+================================================================================
 
-**Group 2** | Winter 2026 | Professor: Leo Lu 
+  Team Members
+  ------------
+  Faizan Razzakbhai Sheikh    114441256
+  Ayush Patel                 129870259
+  Marjan Haghighi             127878254
+  Sharun Manakkara            148442247
+  Nrupad Ganeshkumar Raval    102465259
 
-| Name | Student ID |
-|------|-----------|
-| Faizan Razzakbhai Sheikh | 114441256 |
-| Ayush Patel | 129870259 |
-| Marjan Haghighi | 127878254 |
-| Sharun Manakkara | 148442247 |
-| Nrupad Ganeshkumar Raval | 102465259 |
 
----
+================================================================================
+  QUICK START
+================================================================================
 
-## Prerequisites (Do These BEFORE Running Terraform)
+  # 1. Install Terraform
+  sudo yum install -y yum-utils
+  sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+  sudo yum -y install terraform
 
-### 1. Install Terraform
-```bash
-sudo yum install -y yum-utils
-sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
-sudo yum -y install terraform
+  # 2. Deploy all environments (run in this exact order)
+  cd dev/network      && terraform init && terraform apply
+  cd ../webservers     && terraform init && terraform apply -var="my_ip=$(curl -s ifconfig.me)/32"
+  cd ../../staging/network  && terraform init && terraform apply
+  cd ../webservers     && terraform init && terraform apply -var="my_ip=$(curl -s ifconfig.me)/32"
+  cd ../../prod/network     && terraform init && terraform apply
+  cd ../webservers     && terraform init && terraform apply -var="my_ip=$(curl -s ifconfig.me)/32"
 
-# Verify installation
-terraform --version
-```
 
-### 2. Configure AWS CLI (Skip if using AWS Academy - already configured)
-```bash
-aws configure
-# Enter: Access Key, Secret Key, Region (us-east-1), Output (json)
-```
+================================================================================
+  PREREQUISITES
+================================================================================
 
-### 3. S3 Buckets for Remote State (Create Manually in AWS Console)
-Three separate buckets are required - one per environment:
-- group2-dev-bucket-terraform
-- group2-staging-bucket-terraform
-- group2-prod-bucket-terraform
+  1. INSTALL TERRAFORM
+  --------------------
+  sudo yum install -y yum-utils
+  sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+  sudo yum -y install terraform
+  terraform --version
 
-For each bucket:
-- Region: us-east-1
-- Enable versioning: Yes
-- Block all public access: Yes
 
-Also create an images/ folder inside each bucket and upload at least one image.
-The web servers will pull images from their own environment bucket on boot.
+  2. CONFIGURE AWS CLI
+  --------------------
+  Skip if using AWS Academy -- credentials are pre-configured.
 
-### 4. Key Pair
-This project uses the AWS Academy default key pair vockey.
-No need to generate a new key pair.
-To SSH into Bastion:
-```bash
-# Download vockey.pem from AWS Academy -> AWS Details -> Download PEM
-chmod 400 labsuser.pem
-ssh -i labsuser.pem ec2-user@<bastion_public_ip>
-```
+  aws configure
+  # Enter: Access Key, Secret Key, Region (us-east-1), Output (json)
 
-### 5. Update Your Admin IP (Required for Bastion SSH Access)
-Find your public IP:
-```bash
-curl ifconfig.me
-```
-Pass it as a variable when running terraform apply:
-```bash
-terraform apply -var="my_ip=YOUR_IP/32"
-```
-Note: If using AWS Academy, your IP changes every session. Run this step each time.
 
----
+  3. S3 BUCKETS FOR REMOTE STATE (Create manually in AWS Console)
+  ---------------------------------------------------------------
+  Create three separate buckets -- one per environment:
 
-## Architecture Summary
+    - group2-dev-bucket-terraform
+    - group2-staging-bucket-terraform
+    - group2-prod-bucket-terraform
 
-| Environment | VPC CIDR | Instances | Instance Type | S3 Bucket |
-|-------------|----------|-----------|---------------|-----------|
-| Dev | 10.100.0.0/16 | 2 | t3.micro | group2-dev-bucket-terraform |
-| Staging | 10.200.0.0/16 | 3 | t3.small | group2-staging-bucket-terraform |
-| Prod | 10.250.0.0/16 | 3 | t3.medium | group2-prod-bucket-terraform |
+  For each bucket:
+    - Region: us-east-1
+    - Enable versioning: Yes
+    - Block all public access: Yes
+    - Create an images/ folder and upload at least one image
 
-Each environment contains:
 
-| Resource | Location |
-|----------|----------|
-| Public Subnet 1 | us-east-1b (Bastion + ALB) |
-| Public Subnet 2 | us-east-1c (NAT GW + ALB) |
-| Public Subnet 3 | us-east-1d (ALB) |
-| Private Subnet 1 | us-east-1b (Web servers) |
-| Private Subnet 2 | us-east-1c (Web servers) |
-| Private Subnet 3 | us-east-1d (Web servers) |
+  4. KEY PAIR
+  -----------
+  This project uses the AWS Academy default key pair: vockey
+  No new key pair needs to be generated.
 
----
+  # Download vockey.pem from: AWS Academy > AWS Details > Download PEM
+  chmod 400 vockey.pem
+  ssh -i vockey.pem ec2-user@<bastion_public_ip>
 
-## Deployment Steps (Run in This Exact Order!)
 
-### Step 1 - Dev Network
-```bash
-cd dev/network
-terraform init
-terraform plan
-terraform apply
-```
-Creates: Dev VPC (10.100.0.0/16), 3 public subnets, 3 private subnets, IGW, NAT GW, route tables
+  5. UPDATE YOUR ADMIN IP (Required for Bastion SSH Access)
+  ---------------------------------------------------------
+  *** WARNING: If using AWS Academy, your IP changes every session.
+               Run this step each time. ***
 
-### Step 2 - Dev Webservers
-```bash
-cd ../webservers
-terraform init
-terraform plan -var="my_ip=YOUR_IP/32"
-terraform apply -var="my_ip=YOUR_IP/32"
-```
-Creates: Bastion host, ALB, Launch Template, ASG (2 instances), CloudWatch alarms
+  curl ifconfig.me
+  # Then pass it when running terraform apply:
+  terraform apply -var="my_ip=YOUR_IP/32"
 
-Note down these outputs:
-- alb_dns_name      open this in browser to test
-- bastion_public_ip use this to SSH into bastion
 
-### Step 3 - Staging Network
-```bash
-cd ../../staging/network
-terraform init
-terraform plan
-terraform apply
-```
-Creates: Staging VPC (10.200.0.0/16), 3 public subnets, 3 private subnets, IGW, NAT GW, route tables
+================================================================================
+  ARCHITECTURE SUMMARY
+================================================================================
 
-### Step 4 - Staging Webservers
-```bash
-cd ../webservers
-terraform init
-terraform plan -var="my_ip=YOUR_IP/32"
-terraform apply -var="my_ip=YOUR_IP/32"
-```
-Creates: Bastion host, ALB, Launch Template, ASG (3 instances), CloudWatch alarms
+  Environment | VPC CIDR        | Instances | Type      | S3 Bucket
+  ------------|-----------------|-----------|-----------|----------------------------
+  Dev         | 10.100.0.0/16   | 2         | t3.micro  | group2-dev-bucket-terraform
+  Staging     | 10.200.0.0/16   | 3         | t3.small  | group2-staging-bucket-terraform
+  Prod        | 10.250.0.0/16   | 3         | t3.medium | group2-prod-bucket-terraform
 
-### Step 5 - Prod Network
-```bash
-cd ../../prod/network
-terraform init
-terraform plan
-terraform apply
-```
-Creates: Prod VPC (10.250.0.0/16), 3 public subnets, 3 private subnets, IGW, NAT GW, route tables
+  Each environment includes:
+    - 3 Public Subnets  (us-east-1b/c/d) -- Bastion, NAT GW, ALB
+    - 3 Private Subnets (us-east-1b/c/d) -- Web servers
+    - Internet Gateway, NAT Gateway, Route Tables
+    - Bastion Host, ALB, Launch Template, ASG, CloudWatch Alarms
 
-### Step 6 - Prod Webservers
-```bash
-cd ../webservers
-terraform init
-terraform plan -var="my_ip=YOUR_IP/32"
-terraform apply -var="my_ip=YOUR_IP/32"
-```
-Creates: Bastion host, ALB, Launch Template, ASG (3 instances), CloudWatch alarms
 
----
+================================================================================
+  DEPLOYMENT STEPS
+================================================================================
 
-## Verify Deployment
+  *** WARNING: Always deploy Network before Webservers.
+               Always deploy Dev > Staging > Prod. ***
 
-### Test Website
-Open the alb_dns_name output in your browser.
-You should see:
-- Welcome to Group 2 page
-- Environment badge (Green=Dev, Orange=Staging, Red=Prod)
-- Instance ID, Hostname, Availability Zone
-- Image loaded from S3 bucket
+  ---- STEP 1: Dev Network ----
+  cd dev/network
+  terraform fmt && terraform init && terraform validate
+  terraform plan
+  terraform apply
+  # Creates: Dev VPC (10.100.0.0/16), subnets, IGW, NAT GW, route tables
 
-Refresh the page multiple times to see different Instance IDs - this proves load balancing is working.
+  ---- STEP 2: Dev Webservers ----
+  cd ../webservers
+  terraform fmt && terraform init && terraform validate
+  terraform plan -var="my_ip=YOUR_IP/32"
+  terraform apply -var="my_ip=YOUR_IP/32"
+  # Note outputs: alb_dns_name and bastion_public_ip
+  # Creates: Bastion, ALB, ASG (2 instances), CloudWatch alarms
 
-### SSH to Bastion
-```bash
-ssh -i labsuser.pem ec2-user@<bastion_public_ip>
-```
+  ---- STEP 3: Staging Network ----
+  cd ../../staging/network
+  terraform fmt && terraform init && terraform validate
+  terraform plan
+  terraform apply
+  # Creates: Staging VPC (10.200.0.0/16), subnets, IGW, NAT GW, route tables
 
-### From Bastion - SSH to Private Web Server
-```bash
-ssh ec2-user@<web_server_private_ip>
-```
+  ---- STEP 4: Staging Webservers ----
+  cd ../webservers
+  terraform fmt && terraform init && terraform validate
+  terraform plan -var="my_ip=YOUR_IP/32"
+  terraform apply -var="my_ip=YOUR_IP/32"
+  # Creates: Bastion, ALB, ASG (3 instances), CloudWatch alarms
 
----
+  ---- STEP 5: Prod Network ----
+  cd ../../prod/network
+  terraform fmt && terraform init && terraform validate
+  terraform plan
+  terraform apply
+  # Creates: Prod VPC (10.250.0.0/16), subnets, IGW, NAT GW, route tables
 
-## GitHub Actions - Security Scan
+  ---- STEP 6: Prod Webservers ----
+  cd ../webservers
+  terraform fmt && terraform init && terraform validate
+  terraform plan -var="my_ip=YOUR_IP/32"
+  terraform apply -var="my_ip=YOUR_IP/32"
+  # Creates: Bastion, ALB, ASG (3 instances), CloudWatch alarms
 
-Automated security scanning is configured using tfsec:
-- Triggers on every push to staging branch
-- Triggers on every pull request to prod branch
 
-Workflow file location: .github/workflows/security-scan.yml
+================================================================================
+  VERIFICATION
+================================================================================
 
-To trigger manually - push any change to staging branch:
-```bash
-git checkout staging
-git merge main
-git push origin staging
-```
+  TEST WEBSITE
+  ------------
+  Open the alb_dns_name output in your browser. You should see:
+    - Welcome to Group 2 page
+    - Environment badge: Green=Dev | Orange=Staging | Red=Prod
+    - Instance ID, Hostname, Availability Zone
+    - Image loaded from the environment's S3 bucket
 
----
+  Refresh multiple times to see different Instance IDs -- confirms load balancing.
 
-## Cleanup (IMPORTANT - Destroy in This Exact Order!)
+  SSH ACCESS
+  ----------
+  # SSH to Bastion
+  ssh -i vockey.pem ec2-user@<bastion_public_ip>
 
-Always destroy webservers before network. Always destroy prod first.
+  # From Bastion -- SSH to private web server
+  ssh ec2-user@<web_server_private_ip>
 
-```bash
-# Prod
-cd prod/webservers  && terraform destroy -var="my_ip=YOUR_IP/32"
-cd ../network       && terraform destroy
 
-# Staging
-cd ../../staging/webservers && terraform destroy -var="my_ip=YOUR_IP/32"
-cd ../network               && terraform destroy
+================================================================================
+  GITHUB ACTIONS -- SECURITY SCAN
+================================================================================
 
-# Dev
-cd ../../dev/webservers && terraform destroy -var="my_ip=YOUR_IP/32"
-cd ../network           && terraform destroy
-```
+  Automated security scanning is configured using tfsec:
+    - Triggers on every push to the staging branch
+    - Triggers on every pull request to the prod branch
+    - Workflow file: .github/workflows/security-scan.yml
 
-WARNING: NAT Gateway charges per hour - always destroy after testing!
+  Trigger manually:
+    git checkout staging
+    git merge main
+    git push origin staging
 
----
 
-## Folder Structure
+================================================================================
+  CLEANUP
+================================================================================
 
-```
-acs730-group2-terraform/
-├── .github/
-│   └── workflows/
-│       └── security-scan.yml   # GitHub Actions tfsec security scan
-├── modules/
-│   └── network/                # Reusable VPC/subnet/NAT module
-│       ├── main.tf
-│       ├── variables.tf
-│       └── output.tf
-├── dev/
-│   ├── network/                # Dev VPC, subnets, IGW, NAT GW, route tables
-│   │   ├── config.tf
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   └── output.tf
-│   └── webservers/             # Dev Bastion, ALB, ASG, CloudWatch
-│       ├── config.tf
-│       ├── main.tf
-│       ├── variables.tf
-│       ├── output.tf
-│       └── install_httpd.tpl
-├── staging/
-│   ├── network/                # Staging VPC, subnets, IGW, NAT GW, route tables
-│   └── webservers/             # Staging Bastion, ALB, ASG, CloudWatch
-└── prod/
-    ├── network/                # Prod VPC, subnets, IGW, NAT GW, route tables
-    └── webservers/             # Prod Bastion, ALB, ASG, CloudWatch
-```
+  *** WARNING: Always destroy Webservers before Network.
+               Always destroy Prod > Staging > Dev.            ***
+
+  *** WARNING: NAT Gateway charges per hour -- destroy after testing! ***
+
+  ---- Prod ----
+  cd prod/webservers && terraform destroy -var="my_ip=YOUR_IP/32"
+  cd ../network      && terraform destroy
+
+  ---- Staging ----
+  cd ../../staging/webservers && terraform destroy -var="my_ip=YOUR_IP/32"
+  cd ../network               && terraform destroy
+
+  ---- Dev ----
+  cd ../../dev/webservers && terraform destroy -var="my_ip=YOUR_IP/32"
+  cd ../network           && terraform destroy
+
+
+================================================================================
+  PROJECT STRUCTURE
+================================================================================
+
+  acs730-group2-terraform/
+  |-- .github/
+  |   `-- workflows/
+  |       `-- security-scan.yml       # GitHub Actions tfsec security scan
+  |-- modules/
+  |   `-- network/                    # Reusable VPC/subnet/NAT module
+  |       |-- main.tf
+  |       |-- variables.tf
+  |       `-- output.tf
+  |-- dev/
+  |   |-- network/                    # Dev VPC, subnets, IGW, NAT GW, route tables
+  |   |   |-- config.tf
+  |   |   |-- main.tf
+  |   |   |-- variables.tf
+  |   |   `-- output.tf
+  |   `-- webservers/                 # Dev Bastion, ALB, ASG, CloudWatch
+  |       |-- config.tf
+  |       |-- main.tf
+  |       |-- variables.tf
+  |       |-- output.tf
+  |       `-- install_httpd.tpl
+  |-- staging/
+  |   |-- network/                    # Staging VPC, subnets, IGW, NAT GW, route tables
+  |   `-- webservers/                 # Staging Bastion, ALB, ASG, CloudWatch
+  `-- prod/
+      |-- network/                    # Prod VPC, subnets, IGW, NAT GW, route tables
+      `-- webservers/                 # Prod Bastion, ALB, ASG, CloudWatch
+
+================================================================================
