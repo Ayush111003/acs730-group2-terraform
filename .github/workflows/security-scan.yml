@@ -11,7 +11,6 @@ on:
 jobs:
   terraform-checks:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         dir: [dev, staging, prod]
@@ -25,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v4
+        uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Format Check
         run: terraform fmt -check -no-color
@@ -51,7 +50,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Trivy scan
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
-          scan-type: config
+          scan-type: fs
           scan-ref: .
+          format: table
+          exit-code: '1'
+          severity: CRITICAL,HIGH
