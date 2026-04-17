@@ -1,7 +1,7 @@
 # ACS730 - Final Project
 ## Two-Tier Web Application Automation with Terraform
 
-**Group 2** | Winter 2026 | Professor: Leo Lu | Seneca College
+**Group 2** | Winter 2026 | Professor: Leo Lu 
 
 | Name | Student ID |
 |------|-----------|
