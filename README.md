@@ -64,13 +64,13 @@ Architecture Summary
 | Prod | 10.250.0.0/16 | 3 | t3.medium | group2-prod-bucket-terraform      |
 
 Each environment contains:
-Resource	Location
-Public Subnet 1	us-east-1b (Bastion + ALB)
-Public Subnet 2	us-east-1c (NAT GW + ALB)
-Public Subnet 3	us-east-1d (ALB)
-Private Subnet 1	us-east-1b (Web servers)
-Private Subnet 2	us-east-1c (Web servers)
-Private Subnet 3	us-east-1d (Web servers)
+| Resource	          | Location                  |
+| Public Subnet 1     | us-east-1b (Bastion + ALB)|
+| Public Subnet 2     | us-east-1c (NAT GW + ALB) |
+| Public Subnet 3     | us-east-1d (ALB)          |
+| Private Subnet 1    | us-east-1b (Web servers)  |
+| Private Subnet 2    | us-east-1c (Web servers)  |
+| Private Subnet 3    | us-east-1d (Web servers)  |
 ---
 Deployment Steps (Run in This Exact Order!)
 Step 1 - Dev Network
