@@ -1,5 +1,5 @@
 # ACS730 - Final Project
-## Two-Tier Web Application Automation with Terraform 
+## Two-Tier Web Application Automation with Terraform ##
 
 **Group 2** | Winter 2026 | Professor: Leo Lu 
 
@@ -177,7 +177,7 @@ ssh ec2-user@<web_server_private_ip>
 
 ## GitHub Actions - Security Scan
 
-Automated security scanning is configured using tfsec:
+Automated security scanning is configured using TFLint and Trivy:
 - Triggers on every push to staging branch
 - Triggers on every pull request to prod branch
 
