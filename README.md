@@ -62,6 +62,7 @@ Architecture Summary
 | Dev | 10.100.0.0/16 | 2 | t3.micro | group2-dev-bucket-terraform         |
 | Staging | 10.200.0.0/16 | 3 | t3.small | group2-staging-bucket-terraform |
 | Prod | 10.250.0.0/16 | 3 | t3.medium | group2-prod-bucket-terraform      |
+
 Each environment contains:
 Resource	Location
 Public Subnet 1	us-east-1b (Bastion + ALB)
