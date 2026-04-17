@@ -1,8 +1,8 @@
-================================================================================
+
   ACS730 - FINAL PROJECT
   Two-Tier Web Application Automation with Terraform
   Group 2 | Winter 2026 | Professor: Leo Lu | Seneca College
-================================================================================
+
 
   Team Members
   ------------
@@ -13,9 +13,9 @@
   Nrupad Ganeshkumar Raval    102465259
 
 
-================================================================================
+
   QUICK START
-================================================================================
+
 
   # 1. Install Terraform
   sudo yum install -y yum-utils
