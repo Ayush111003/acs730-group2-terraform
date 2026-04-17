@@ -9,15 +9,49 @@ on:
       - prod
 
 jobs:
-  tfsec:
-    name: tfsec security scan
+  terraform-checks:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        dir: [dev, staging, prod]
+
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Run tfsec
-        uses: aquasecurity/tfsec-action@v1.0.0
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -no-color
+
+      - name: Terraform Init
+        run: terraform init -backend=false -no-color
+
+      - name: Terraform Validate
+        run: terraform validate -no-color
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+
+      - name: Run TFLint
+        run: |
+          tflint --init
+          tflint
+
+  trivy-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy scan
+        uses: aquasecurity/trivy-action@0.20.0
         with:
-          soft_fail: true
+          scan-type: config
+          scan-ref: .
