@@ -1,5 +1,5 @@
 # ACS730 - Final Project
-## Two-Tier Web Application Automation with Terraform
+## Two-Tier Web Application Automation with Terraform ##
 
 **Group 2** | Winter 2026 | Professor: Leo Lu 
 
