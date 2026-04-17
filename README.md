@@ -1,12 +1,14 @@
 ACS730 - Final Project
 Two-Tier Web Application Automation with Terraform
 Group 2 | Winter 2026 | Professor: Leo Lu
-Name	Student ID
-Faizan Razzakbhai Sheikh	114441256
-Ayush Patel	129870259
-Marjan Haghighi	127878254
-Sharun Manakkara	148442247
-Nrupad Ganeshkumar Raval	102465259
+
+| Name | Student ID                    |
+|------|-------------------------------|
+| Faizan Razzakbhai Sheikh | 114441256 |
+| Ayush Patel              | 129870259 |
+| Marjan Haghighi          | 127878254 |
+| Sharun Manakkara         | 148442247 |
+| Nrupad Ganeshkumar Raval | 102465259 |
 ---
 Prerequisites (Do These BEFORE Running Terraform)
 1. Install Terraform
@@ -55,10 +57,11 @@ terraform apply -var="my\_ip=YOUR\_IP/32"
 Note: If using AWS Academy, your IP changes every session. Run this step each time.
 ---
 Architecture Summary
-Environment	VPC CIDR	Instances	Instance Type	S3 Bucket
-Dev	10.100.0.0/16	2	t3.micro	group2-dev-bucket-terraform
-Staging	10.200.0.0/16	3	t3.small	group2-staging-bucket-terraform
-Prod	10.250.0.0/16	3	t3.medium	group2-prod-bucket-terraform
+| Environment | VPC CIDR | Instances | Type | S3 Bucket                    |
+|-------------|----------|-----------|------|-----------                   |
+| Dev | 10.100.0.0/16 | 2 | t3.micro | group2-dev-bucket-terraform         |
+| Staging | 10.200.0.0/16 | 3 | t3.small | group2-staging-bucket-terraform |
+| Prod | 10.250.0.0/16 | 3 | t3.medium | group2-prod-bucket-terraform      |
 Each environment contains:
 Resource	Location
 Public Subnet 1	us-east-1b (Bastion + ALB)
